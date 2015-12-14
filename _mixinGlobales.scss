@@ -1,0 +1,108 @@
+/* @author fvictor */
+/* @description This is a very tiny mixin library that i'm used to need. I try
+ * to keep it simple and short. It must be composed of generic mixins only.
+ */
+
+/* Global mixins ----------------------------------------------------------- */
+
+/* multibrowser
+ * Given a $property and its $value, it prints every multibrowser prefixes.
+ */
+@mixin multibrowser($property, $value) {
+    -webkit-#{$property}: $value;
+    -khtml-#{$property}: $value;
+    -moz-#{$property}: $value;
+    -ms-#{$property}: $value;
+    -o-#{$property}: $value;
+    #{$property}: $value;
+}
+
+/* ------------------------------------------------------------------------- */
+/* border-radius:
+ * Parameter's order: top-left, top-right, bottom-right, bottom-left. 
+ * 
+ * If bottom-left is omitted, then it will have the top-right value.
+ * If bottom-right is omitted, then it will have the top-left value.
+ * If top-right is omitted, then it will have the top-left value. 
+ * 
+ * At first, the horizontal logic is applyed, then the vertical logic.
+ * In such case that the vertical logic would not be defined, then it takes the
+ * value of the horizontal logic.
+ */
+@mixin border-radius(
+    $horizontal-top-left, 
+    $horizontal-top-right: false, 
+    $horizontal-bottom-right: false, 
+    $horizontal-bottom-left: false,
+    $vertical-top-left: false, 
+    $vertical-top-right: false, 
+    $vertical-bottom-right: false, 
+    $vertical-bottom-left: false
+) {
+    @if not $horizontal-top-right {
+        $horizontal-top-right: $horizontal-top-left;
+    }	
+    @if not $horizontal-bottom-right{
+        $horizontal-bottom-right: $horizontal-top-left;
+    }
+    @if not $horizontal-bottom-left {
+        $horizontal-bottom-left: $horizontal-top-right;
+    }
+
+    @if not $vertical-top-left {
+        $vertical-top-left: $horizontal-top-right;
+    }	
+    @if not $vertical-top-right {
+        $vertical-top-right: $vertical-top-left;
+    }	
+    @if not $vertical-bottom-right{
+        $vertical-bottom-right: $vertical-top-left;
+    }
+    @if not $vertical-bottom-left {
+        $vertical-bottom-left: $vertical-top-right;
+    }
+    @include multibrowser(border-radius, $horizontal-top-left $horizontal-top-right $horizontal-bottom-right $horizontal-bottom-left unquote("/") $vertical-top-left $vertical-top-right $vertical-bottom-right $vertical-bottom-left);
+}
+
+/* -------------------------------------------------------------------------- */
+/* simple-transition:
+ * A simple transition with multibrowser support.
+ */
+@mixin simple-transition($transition-property: all, $transition-duration: 0s, $transition-timing-function: ease, $transition-delay: 0s) {
+    @include multibrowser(transition, $transition-property $transition-duration $transition-timing-function $transition-delay);
+}
+
+/* multiple-transition:
+ * For multiple values, given a list with the next format:
+ *  ((property duration timing-function delay)
+ *   [,(property duration timing-function delay)])
+ *
+ * Default values: all 0 ease 0.
+ * 
+ * Example:
+ * (
+ *      (width 1s ease 0s),
+ *      (height 3s line 2s),
+ * )
+ */
+@mixin multiple-transition($transition-list: ()) {
+    /* NOTE: Remember that sass lists starts with the index "1".*/
+    $longitud: length($transition-list);
+    @if $longitud == 1 {
+        @include  simple-transition(nth($transition-list,1));
+    } @else if $longitud > 1 {		
+        @include multibrowser(transition, $transition-list);
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* user-select:
+ * A user-select definition with multibrowser support.
+ * $values: none | text | toggle | element | elements | all | inherit
+ * Default value: text
+ */
+@mixin user-select($user-select: text) {
+    @include ats-multibrowser(user-select, $user-select);
+}
+/* ------------------------------------------------------------------------- */
+
